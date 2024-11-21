@@ -1,0 +1,24 @@
+{
+  "name": "skyrealm-admin-panel",
+  "version": "1.0.0",
+  "description": "This is a Admin Dashboard Panel for the admin stuff",
+  "main": "startup.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "Arman Syazwan",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.3",
+    "express": "^4.21.0",
+    "express-php-fpm": "^2.0.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.6.2",
+    "mqtt": "^5.10.1",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.2",
+    "sweetalert2": "^11.13.3"
+  }
+}
