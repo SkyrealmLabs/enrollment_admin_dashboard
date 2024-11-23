@@ -23,10 +23,10 @@ httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 
 // Create MySQL connection
 const db = mysql.createConnection({
-  host: 'localhost',    // Your MySQL host
-  user: 'root',         // Your MySQL username
+  host: 'skyrealm.c38uswgckrfp.ap-southeast-1.rds.amazonaws.com',    // Your MySQL host
+  user: 'admin',         // Your MySQL username
   password: 'passw0rd', // Your MySQL password
-  database: 'skyrealm'    // Your database name
+  database: 'skyintel'    // Your database name
 });
 
 // Connect to MySQL
