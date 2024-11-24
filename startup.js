@@ -513,7 +513,8 @@ httpWebApp.get('*', (req, res) => {
 // Serve PHP files from the www directory
 httpWebApp.use("/", epf(options));
 
+const PORT = process.env.PORT || 3000;
 // Start the server
-httpWebApp.listen(9054, '0.0.0.0', () => { 
+httpWebApp.listen(PORT, '0.0.0.0', () => { 
   console.log('SkyRealm Admin Panel is running in HTTP mode using port 9054')
 });
