@@ -26,7 +26,8 @@ const db = mysql.createConnection({
   host: 'skyrealm.c38uswgckrfp.ap-southeast-1.rds.amazonaws.com',    // Your MySQL host
   user: 'admin',         // Your MySQL username
   password: 'passw0rd', // Your MySQL password
-  database: 'skyintel'    // Your database name
+  database: 'skyintel',    // Your database name
+  port: 3306
 });
 
 // Connect to MySQL
@@ -513,4 +514,6 @@ httpWebApp.get('*', (req, res) => {
 httpWebApp.use("/", epf(options));
 
 // Start the server
-httpWebApp.listen(9054, () => console.log('SkyRealm Admin Panel is running in HTTP mode using port 9054'));
+httpWebApp.listen(9054, '0.0.0.0', () => { 
+  console.log('SkyRealm Admin Panel is running in HTTP mode using port 9054')
+});
