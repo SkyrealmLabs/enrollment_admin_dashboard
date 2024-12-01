@@ -23,8 +23,8 @@ httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 
 // Create MySQL connection
 const db = mysql.createConnection({
-  host: 'skyrealm.c38uswgckrfp.ap-southeast-1.rds.amazonaws.com',    // Your MySQL host
-  user: 'admin',         // Your MySQL username
+  host: '46.137.200.25',    // Your MySQL host
+  user: 'skyrealm',         // Your MySQL username
   password: 'passw0rd', // Your MySQL password
   database: 'skyintel',    // Your database name
   port: 3306
