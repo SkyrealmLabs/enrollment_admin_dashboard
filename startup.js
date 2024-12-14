@@ -516,5 +516,5 @@ httpWebApp.use("/", epf(options));
 const PORT = process.env.PORT || 3000;
 // Start the server
 httpWebApp.listen(PORT, '0.0.0.0', () => { 
-  console.log('SkyRealm Admin Panel is running in HTTP mode using port 9054')
+  console.log('SkyRealm Admin Panel is running in HTTP mode using port ' + PORT)
 });
