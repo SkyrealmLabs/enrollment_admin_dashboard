@@ -14,27 +14,44 @@ const fs = require('fs');
 const {
   JWT_SECRET,
   RECAPTCHA_SECRET,
-  UPLOAD_DIRECTORY
+  // UPLOAD_DIRECTORY
 } = require('./constant');
+const UPLOAD_DIRECTORY = path.join(__dirname, 'uploads');
+
+let db;
 
 // Initialize Express app
 const httpWebApp = express();
 httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 
 // Create MySQL connection
-const db = mysql.createConnection({
-  host: '46.137.200.25',    // Your MySQL host
-  user: 'skyrealm',         // Your MySQL username
-  password: 'passw0rd', // Your MySQL password
-  database: 'skyintel',    // Your database name
-  port: 3306
-});
+function handleDisconnect() {
+  db = mysql.createConnection({
+    host: '46.137.200.25',    // Your MySQL host
+    user: 'skyrealm',         // Your MySQL username
+    password: 'passw0rd',     // Your MySQL password
+    database: 'skyintel',     // Your database name
+    port: 3306,
+  });
 
-// Connect to MySQL
-db.connect(err => {
-  if (err) throw err;
-  console.log('Connected to MySQL Database');
-});
+  db.connect(err => {
+    if (err) {
+      console.error('Error when connecting to the database:', err);
+      setTimeout(handleDisconnect, 2000); // Retry after 2 seconds
+    } else {
+      console.log('Connected to MySQL Database');
+    }
+  });
+
+  db.on('error', err => {
+    console.error('Database error:', err);
+    if (err.code === 'PROTOCOL_CONNECTION_LOST') {
+      handleDisconnect(); // Reconnect if the connection is lost
+    } else {
+      throw err;
+    }
+  });
+}
 
 // Express-PHP-FPM configuration
 const options = {
@@ -73,16 +90,27 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
-    // Accept video files only
-    const fileTypes = /mp4|mov|avi|wmv|mkv/; // Add more video extensions as needed
-    const mimetype = fileTypes.test(file.mimetype);
+    // Define allowed MIME types
+    const allowedMimeTypes = [
+      "video/mp4",
+      "video/quicktime", // For .mov files
+      "video/x-msvideo", // For .avi files
+      "video/x-ms-wmv", // For .wmv files
+      "video/x-matroska", // For .mkv files
+    ];
+    const fileTypes = /mp4|mov|avi|wmv|mkv|quicktime/; // Allowed file extensions
 
-    if (mimetype) {
-      cb(null, true); // Accept the file
+    // Check if MIME type is valid
+    const mimetype = allowedMimeTypes.includes(file.mimetype);
+    // Check if file extension is valid
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      cb(null, true);
     } else {
-      cb(new Error('Only video files are allowed!'), false); // Reject the file
+      cb(new Error("Only video files are allowed!"), false);
     }
-  }
+  },
 });
 
 /**********************************************************************/
@@ -174,9 +202,9 @@ httpWebApp.post('/api/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, role: role }, JWT_SECRET, { expiresIn: '1h' });
 
     // Send the response with user data, message, and token
-    res.status(200).json({ 
-      message: "Login successful", 
-      token, 
+    res.status(200).json({
+      message: "Login successful",
+      token,
       user: {
         id: user.id,
         name: user.name, // Include other fields as necessary
@@ -265,9 +293,8 @@ httpWebApp.post('/api/verify-recaptcha', (req, res) => {
 /**********************************************************************/
 /*************************** ADD LOCATION API *************************/
 /**********************************************************************/
-httpWebApp.post('/api/location/add', upload.single('media'), (req, res) => {
+httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) => {
   const { userID, address, coordinate } = req.body;
-
   // Check if all required fields are provided
   if (!address || !coordinate || !req.file) {
     return res.status(400).json({ message: "All fields are required" });
@@ -296,7 +323,7 @@ httpWebApp.post('/api/location/add', upload.single('media'), (req, res) => {
         mediaPath: req.file.path
       });
     });
-  
+
   // Don't send another response here.
 });
 
@@ -490,6 +517,45 @@ httpWebApp.post('/api/location/enrollment/log', (req, res) => {
   });
 });
 
+/**********************************************************************/
+/********************* LOG LOCATION ENROLLMENT REVIEW *****************/
+/**********************************************************************/
+httpWebApp.post('/api/user/updateProfile', (req, res) => {
+  const { id, name, email, phone } = req.body; // Extract user data from the request body
+
+  // Validate required fields
+  if (!id || !name || !email || !phone) {
+    return res.status(400).json({ message: "All fields (userID, name, email, phone) are required" });
+  }
+
+  // SQL query to update the user's profile
+  const query = `
+    UPDATE user
+    SET name = ?, email = ?, phoneno = ?
+    WHERE id = ?
+  `;
+
+  // Parameters for the query
+  const params = [name, email, phone, id];
+
+  // Execute the query
+  db.query(query, params, (err, result) => {
+    if (err) {
+      console.error("Database error: ", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    // Check if any rows were affected (updated)
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with a success message
+    return res.status(200).json({ message: "Profile updated successfully" });
+  });
+});
+
+
 
 /**********************************************************************/
 /****************** SERVE INDEX.HTML FROM SUBDIRECTORIES **************/
@@ -515,6 +581,8 @@ httpWebApp.use("/", epf(options));
 
 const PORT = process.env.PORT || 3000;
 // Start the server
-httpWebApp.listen(PORT, '0.0.0.0', () => { 
+httpWebApp.listen(PORT, '0.0.0.0', () => {
   console.log('SkyRealm Admin Panel is running in HTTP mode using port ' + PORT)
 });
+
+handleDisconnect();
