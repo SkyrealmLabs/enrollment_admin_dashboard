@@ -72,6 +72,7 @@ httpWebApp.use("/scripts", express.static(path.join(__dirname, "node_modules/"))
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
+    console.log("🚀 ~ UPLOAD_DIRECTORY:", UPLOAD_DIRECTORY)
     // Ensure the upload directory exists
     if (!fs.existsSync(UPLOAD_DIRECTORY)) {
       fs.mkdirSync(UPLOAD_DIRECTORY, { recursive: true }); // Create the directory if it doesn't exist
