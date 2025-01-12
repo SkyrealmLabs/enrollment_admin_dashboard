@@ -11,6 +11,7 @@ const https = require('https');
 const querystring = require('querystring');
 const path = require('path');
 const fs = require('fs');
+const cors = require('cors');
 const {
   JWT_SECRET,
   RECAPTCHA_SECRET,
@@ -578,6 +579,16 @@ httpWebApp.get('*', (req, res) => {
     }
   });
 });
+
+// CORS Configuration
+const corsOptions = {
+  origin: '*', // Allow all origins (update to specific origins in production)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed headers
+};
+
+// Use CORS Middleware
+httpWebApp.use(cors(corsOptions));
 
 // Serve PHP files from the www directory
 httpWebApp.use("/", epf(options));
