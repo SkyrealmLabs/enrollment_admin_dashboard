@@ -72,7 +72,6 @@ httpWebApp.use("/scripts", express.static(path.join(__dirname, "node_modules/"))
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    console.log("🚀 ~ UPLOAD_DIRECTORY:", UPLOAD_DIRECTORY)
     // Ensure the upload directory exists
     if (!fs.existsSync(UPLOAD_DIRECTORY)) {
       fs.mkdirSync(UPLOAD_DIRECTORY, { recursive: true }); // Create the directory if it doesn't exist
@@ -296,6 +295,9 @@ httpWebApp.post('/api/verify-recaptcha', (req, res) => {
 /**********************************************************************/
 httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) => {
   const { userID, address, coordinate } = req.body;
+  console.log("🚀 ~ httpWebApp.post ~ coordinate:", coordinate)
+  console.log("🚀 ~ httpWebApp.post ~ address:", address)
+  console.log("🚀 ~ httpWebApp.post ~ userID:", userID)
   // Check if all required fields are provided
   if (!address || !coordinate || !req.file) {
     return res.status(400).json({ message: "All fields are required" });
