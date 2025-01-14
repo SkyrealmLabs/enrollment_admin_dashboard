@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="/assets/img/drone-icon.png">
+    <title>API Usage Guidance</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+        }
+
+        header {
+            background-color: #0058a6;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #ffffff;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        pre {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        section {
+            margin-bottom: 2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: #333;
+            color: white;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>API Usage Guidance</h1>
+    </header>
+    <main>
+        <section>
+            <h2>Introduction</h2>
+            <p>Welcome to the API documentation for our service. This guide will help you understand how to interact
+                with the API endpoints.</p>
+        </section>
+        <section>
+            <h2>Available Endpoints</h2>
+
+            <h3>1. Get All Locations</h3>
+            <pre>
+                <b>GET</b> /api/locations
+            </pre>
+            <p>Retrieve all available locations.</p>
+            
+            <h3>2. Get Location Details by ID</h3>
+            <pre>
+                <b>POST</b> /api/location/getLocationDetailsById
+                Headers:
+                Content-Type: application/json
+
+                Body:
+                {
+                    "ID": "Location ID"
+                }
+
+                Response:
+                {
+                    "message": "Location details fetched successfully",
+                    "totalLocations": 1,
+                    "data": [
+                        {
+                            "id": 1,
+                            "userid": 123,
+                            "name": "User Name",
+                            "email": "user@example.com",
+                            "status": "Active",
+                            "locationAddress": "123 Main Street",
+                            "latitude": "37.7749",
+                            "longitude": "-122.4194",
+                            "mediaPath": "http://example.com/media/path"
+                        }
+                    ]
+                }
+            </pre>
+            <p>Retrieve detailed information for a specific location by its ID.</p>
+
+            <h3>3. Get Locations by User ID</h3>
+            <pre>
+                <b>POST</b> /api/location/getLocationByUserId
+                Headers:
+                Content-Type: application/json
+
+                Body:
+                {
+                    "userID": "User ID"
+                }
+
+                Response:
+                {
+                    "message": "Locations fetched successfully",
+                    "totalLocations": 2,
+                    "data": [
+                        {
+                            "id": 1,
+                            "userid": 123,
+                            "status": "Active",
+                            "locationAddress": "123 Main Street",
+                            "latitude": "37.7749",
+                            "longitude": "-122.4194",
+                            "mediaPath": "http://example.com/media/path"
+                        },
+                        {
+                            "id": 2,
+                            "userid": 123,
+                            "status": "Inactive",
+                            "locationAddress": "456 Elm Street",
+                            "latitude": "40.7128",
+                            "longitude": "-74.0060",
+                            "mediaPath": "http://example.com/media/path2"
+                        }
+                    ]
+                }
+            </pre>
+            <p>Retrieve all non-deleted locations associated with a specific user ID.</p>
+        </section>
+
+    </main>
+</body>
+
+</html>
