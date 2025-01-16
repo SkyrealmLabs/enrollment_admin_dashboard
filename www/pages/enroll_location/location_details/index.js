@@ -117,12 +117,14 @@ function displayLocationDetails(locationData) {
     var address = document.getElementById("address");
     var status = document.getElementById("status");
     var status_badge = document.getElementById("status_badge")
+    var video_source = document.getElementById("videoSource");
 
     if (locationData) {
         person.innerText = locationData[0].name;
         email.innerText = locationData[0].email;
         location_coordinate.innerText = locationData[0].latitude + ", " + locationData[0].longitude;
         address.innerText = locationData[0].locationAddress;
+        video_source.src = "/uploads/" + locationData[0].mediaPath.split('\\').pop();
 
         if (locationData[0].status === 'pending') {
             status.innerHTML = `<div class="col-lg-6">

@@ -296,9 +296,6 @@ httpWebApp.post('/api/verify-recaptcha', (req, res) => {
 /**********************************************************************/
 httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) => {
   const { userID, address, coordinate } = req.body;
-  console.log("🚀 ~ httpWebApp.post ~ coordinate:", coordinate)
-  console.log("🚀 ~ httpWebApp.post ~ address:", address)
-  console.log("🚀 ~ httpWebApp.post ~ userID:", userID)
   // Check if all required fields are provided
   if (!address || !coordinate || !req.file) {
     return res.status(400).json({ message: "All fields are required" });
@@ -411,9 +408,9 @@ httpWebApp.post('/api/location/getLocationDetailsById', (req, res) => {
   // Query to get non-deleted locations for the specified user
   const query = `
     SELECT l.id, l.userid, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
-    FROM skyrealm.location l
-    INNER JOIN skyrealm.location_status ls ON l.locationStatusId = ls.id
-    INNER JOIN skyrealm.user u ON l.userid = u.id
+    FROM location l
+    INNER JOIN location_status ls ON l.locationStatusId = ls.id
+    INNER JOIN user u ON l.userid = u.id
     WHERE l.isDeleted = false AND u.isDeleted = false AND l.id = ?
   `;
 
@@ -559,7 +556,98 @@ httpWebApp.post('/api/user/updateProfile', (req, res) => {
   });
 });
 
+/**********************************************************************/
+/************************ VALIDATE LOCATION API ***********************/
+/**********************************************************************/
+httpWebApp.post('/api/location/validate', (req, res) => {
+  const { pickup, dropoff } = req.body;
 
+  if (
+    !pickup || !dropoff || !pickup.latitude || !pickup.longitude || !dropoff.latitude || !dropoff.longitude
+  ) {
+    return res
+      .status(400)
+      .json({ error: 'Pickup and dropoff coordinates are required' });
+  }
+
+  const query = 'SELECT * FROM location';
+  db.query(query, (err, results) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database query error' });
+    }
+
+    // Function to find the nearest location
+    const findNearestLocation = (latitude, longitude) => {
+      let nearestLocation = null;
+      let minDistance = 1000; // set the minimum range for nearest location
+
+      results.forEach((row) => {
+        const distance = calculateDistance(
+          latitude,
+          longitude,
+          row.latitude,
+          row.longitude
+        );
+
+        if (distance <= minDistance) {
+          minDistance = distance;
+          nearestLocation = row;
+        }
+      });
+
+      return nearestLocation;
+    };
+
+    // Find nearest locations for pickup and dropoff
+    const nearestPickup = findNearestLocation(
+      pickup.latitude,
+      pickup.longitude
+    );
+
+    const nearestDropoff = findNearestLocation(
+      dropoff.latitude,
+      dropoff.longitude
+    );
+
+    if (nearestPickup && nearestDropoff) {
+      res.status(200).json({
+        message: 'Both pickup and dropoff locations are valid',
+        nearestPickup,
+        nearestDropoff,
+      });
+    } else {
+      res.status(400).json({
+        error: 'Invalid locations',
+        details: {
+          pickup: nearestPickup
+            ? 'Valid'
+            : 'No nearby location found for pickup',
+          dropoff: nearestDropoff
+            ? 'Valid'
+            : 'No nearby location found for dropoff',
+        },
+      });
+    }
+  });
+});
+
+/**********************************************************************/
+/*************************** HAVERSINE FUNCTION ***********************/
+/**********************************************************************/
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Radius of Earth in meters
+  const toRadians = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+    Math.cos(toRadians(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 /**********************************************************************/
 /****************** SERVE INDEX.HTML FROM SUBDIRECTORIES **************/
