@@ -124,7 +124,7 @@ function displayLocationDetails(locationData) {
         email.innerText = locationData[0].email;
         location_coordinate.innerText = locationData[0].latitude + ", " + locationData[0].longitude;
         address.innerText = locationData[0].locationAddress;
-        video_source.src = "http://172.31.22.51:3000/" + locationData[0].mediaPath.split('/').pop();
+        video_source.src = "http://13.213.61.111:3000/" + locationData[0].mediaPath.split('/').pop();
 
         if (locationData[0].status === 'pending') {
             status.innerHTML = `<div class="col-lg-6">
