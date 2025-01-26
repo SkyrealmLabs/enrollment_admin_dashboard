@@ -65,6 +65,7 @@ const options = {
 // Serve static files from the www directory and assets
 httpWebApp.use(express.static(path.join(__dirname, "www"))); // Serve main www directory
 httpWebApp.use(express.static(path.join(__dirname, "www/assets"))); // Serve assets directory
+httpWebApp.use(express.static(path.join(__dirname, "upload"))); // Serve upload directory
 httpWebApp.use("/scripts", express.static(path.join(__dirname, "node_modules/"))); // Serve node_modules for scripts
 
 /**********************************************************************/
