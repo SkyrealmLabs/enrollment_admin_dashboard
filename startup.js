@@ -28,7 +28,8 @@ httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 // Create MySQL connection
 function handleDisconnect() {
   db = mysql.createConnection({
-    host: '172.31.17.96',    // Your MySQL host
+    host: '172.31.17.96',    // Private IP
+    // host: '47.129.207.40',    // Public IP
     user: 'skyrealm',         // Your MySQL username
     password: 'passw0rd',     // Your MySQL password
     database: 'skyintel',     // Your database name
