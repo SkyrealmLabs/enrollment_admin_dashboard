@@ -28,7 +28,7 @@ httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 // Create MySQL connection
 function handleDisconnect() {
   db = mysql.createConnection({
-    host: '172.31.17.96',    // Private IP
+    host: '54.251.156.105',    // Private IP
     // host: '47.129.207.40',    // Public IP
     user: 'skyrealm',         // Your MySQL username
     password: 'passw0rd',     // Your MySQL password
@@ -683,7 +683,7 @@ httpWebApp.use(cors(corsOptions));
 // Serve PHP files from the www directory
 httpWebApp.use("/", epf(options));
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3005;
 // Start the server
 httpWebApp.listen(PORT, '0.0.0.0', () => {
   console.log('SkyRealm Admin Panel is running in HTTP mode using port ' + PORT)
