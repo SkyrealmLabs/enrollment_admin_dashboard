@@ -28,12 +28,11 @@ httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 // Create MySQL connection
 function handleDisconnect() {
   db = mysql.createConnection({
-    host: '54.251.156.105',    // Private IP
-    // host: '47.129.207.40',    // Public IP
-    user: 'skyrealm',         // Your MySQL username
-    password: 'passw0rd',     // Your MySQL password
+    host: 'localhost', 
+    user: 'root',         // Your MySQL username
+    password: '123456',     // Your MySQL password
     database: 'skyintel',     // Your database name
-    port: 3306,
+    port: 3307,
   });
 
   db.connect(err => {
@@ -370,7 +369,7 @@ httpWebApp.post('/api/location/getLocationByUserId', (req, res) => {
 
   // Query to get non-deleted locations for the specified user
   const query = `
-    SELECT l.id, l.userid, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
+    SELECT l.id, l.userid, l.aruco_id, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
     FROM location l
     INNER JOIN location_status ls ON l.locationStatusId = ls.id
     WHERE l.isDeleted = false AND l.userid = ?
@@ -409,7 +408,7 @@ httpWebApp.post('/api/location/getLocationDetailsById', (req, res) => {
 
   // Query to get non-deleted locations for the specified user
   const query = `
-    SELECT l.id, l.userid, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
+    SELECT l.id, l.userid, l.aruco_id, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
     FROM location l
     INNER JOIN location_status ls ON l.locationStatusId = ls.id
     INNER JOIN user u ON l.userid = u.id
@@ -440,17 +439,17 @@ httpWebApp.post('/api/location/getLocationDetailsById', (req, res) => {
 /*************************** Enroll Location **************************/
 /**********************************************************************/
 httpWebApp.post('/api/location/review', (req, res) => {
-  const { locationStatusId, id } = req.body;
+  const { locationStatusId, aruco_id, id } = req.body;
 
   // SQL query to update the location status and set updated_at to the current timestamp
   const query = `
     UPDATE location
-    SET locationStatusId = ?, updated_at = NOW()
+    SET locationStatusId = ?, aruco_id = ?, updated_at = NOW()
     WHERE id = ?;
   `;
 
   // Execute the query with the provided data
-  db.query(query, [locationStatusId, id], (err, results) => {
+  db.query(query, [locationStatusId, aruco_id, id], (err, results) => {
     if (err) {
       console.error("Database error: ", err);
       return res.status(500).json({ message: "Database error" });

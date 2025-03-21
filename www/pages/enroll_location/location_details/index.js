@@ -111,12 +111,14 @@ function displayErrorMessage(message) {
 }
 
 function displayLocationDetails(locationData) {
+    console.log("🚀 ~ displayLocationDetails ~ locationData:", locationData)
     var person = document.getElementById("person");
     var email = document.getElementById("email");
     var location_coordinate = document.getElementById("location_coordinate");
     var address = document.getElementById("address");
+    var aruco_id = document.getElementById("aruco_id");
     var status = document.getElementById("status");
-    var status_badge = document.getElementById("status_badge")
+    var status_badge = document.getElementById("status_badge");
     var video_source = document.getElementById("videoSource");
 
     if (locationData) {
@@ -147,12 +149,18 @@ function displayLocationDetails(locationData) {
         }
 
     }
+
+    if (locationData[0].aruco_id) {
+        aruco_id.innerText = locationData[0].aruco_id;
+    } else {
+        aruco_id.innerText = "Not stated"
+    }
 }
 
 function review() {
     Swal.fire({
-        title: 'What would you like to do?',
-        text: 'You can either approve, reject, or cancel this enrollment.',
+        title: 'What action would you like to take?',
+        text: 'You can approve, reject, or cancel this enrollment.',
         icon: 'question',
         showDenyButton: true,            // Show "Reject" button
         showCancelButton: true,          // Show "Cancel" button
@@ -165,11 +173,29 @@ function review() {
     }).then((result) => {
         if (result.isConfirmed) {
 
-            enroll('approve');
+            // Show input for Aruco ID
+            Swal.fire({
+                title: 'Enter Aruco ID',
+                input: 'text',
+                inputPlaceholder: 'Enter Aruco ID here...',
+                showCancelButton: true,
+                confirmButtonText: 'Submit',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Aruco ID is required!';
+                    }
+                }
+            }).then((inputResult) => {
+                if (inputResult.isConfirmed) {
+                    // Call enroll function with the Aruco ID
+                    enroll('approve', inputResult.value);
+                }
+            });
 
         } else if (result.isDenied) {
 
-            enroll('reject');
+            enroll('reject', null);
 
         } else if (result.dismiss === Swal.DismissReason.cancel) {
             // Action if the user clicked 'Cancel'
@@ -182,9 +208,10 @@ function review() {
     });
 }
 
-function enroll(action) {
+function enroll(action, val) {
     let locationStatusId;
     let actionText;
+    let aruco_id = val;
 
     // Determine the status and corresponding action text
     if (action === 'approve') {
@@ -213,6 +240,7 @@ function enroll(action) {
         },
         body: JSON.stringify({
             locationStatusId: locationStatusId,
+            aruco_id: aruco_id,
             id: locationID
         })
     })
@@ -228,7 +256,7 @@ function enroll(action) {
                     // Call the logging API to log the review action
                     logReviewAction(user, locationID, actionText);
                     // Redirect to the previous page after approval
-                    // window.location.href = document.referrer;
+                    window.location.href = document.referrer;
                 });
             } else {
                 Swal.fire({
@@ -262,16 +290,16 @@ function logReviewAction(user, locationID, action) {
             action: action
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Logging failed');
-        }
-        return response.json();
-    })
-    // .then(data => {
-    //     console.log('Action logged successfully:', data);
-    // })
-    .catch(error => {
-        console.error('Error logging action:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Logging failed');
+            }
+            return response.json();
+        })
+        // .then(data => {
+        //     console.log('Action logged successfully:', data);
+        // })
+        .catch(error => {
+            console.error('Error logging action:', error);
+        });
 }

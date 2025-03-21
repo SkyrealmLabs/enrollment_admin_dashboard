@@ -90,34 +90,31 @@ function generateTableRows(data) {
             actionContent = `
                 <a href="javascript:;" onclick='viewLocation(${JSON.stringify(item.id)})' data-bs-toggle="tooltip" data-bs-original-title="View Location">
                     <i class="material-icons text-secondary position-relative text-lg">visibility</i>
-                </a>
-                <a href="javascript:confirmation();" class="mx-3" data-bs-toggle="tooltip" data-bs-original-title="Enroll">
-                    <i class="material-icons text-secondary position-relative text-lg">edit_location_alt</i>
                 </a>`;
                     statusBadge = '<span class="badge badge-warning">' + item.status + '</span>';
                 } else if (item.status === 'approved') {
                     actionContent = `
-                <a href="javascript:;" onclick='viewLocation(${JSON.stringify(item.id)})' data-bs-toggle="tooltip" data-bs-original-title="View Location">
-                    <i class="material-icons text-secondary position-relative text-lg">visibility</i>
-                </a>`;
+                                <a href="javascript:;" onclick='viewLocation(${JSON.stringify(item.id)})' data-bs-toggle="tooltip" data-bs-original-title="View Location">
+                                    <i class="material-icons text-secondary position-relative text-lg">visibility</i>
+                                </a>`;
                     statusBadge = '<span class="badge badge-success">' + item.status + '</span>';
                 } else if (item.status === 'rejected') {
                     actionContent = `
-                <a href="javascript:;" onclick='viewLocation(${JSON.stringify(item.id)})' data-bs-toggle="tooltip" data-bs-original-title="View Location">
-                    <i class="material-icons text-secondary position-relative text-lg">visibility</i>
-                </a>`;
+                                <a href="javascript:;" onclick='viewLocation(${JSON.stringify(item.id)})' data-bs-toggle="tooltip" data-bs-original-title="View Location">
+                                    <i class="material-icons text-secondary position-relative text-lg">visibility</i>
+                                </a>`;
                     statusBadge = '<span class="badge badge-danger">' + item.status + '</span>';
         }
 
         const row = `
-            <tr>
-                <td class="text-sm">${index + 1}</td>
-                <td><div class="d-flex"><h6 class="my-auto">${item.locationAddress}</h6></div></td>
-                <td class="text-sm">${item.name}</td>
-                <td class="text-sm">${item.email}</td>
-                <td class="text-sm">${statusBadge}</td>
-                <td class="text-sm">${actionContent}</td>
-            </tr>`;
+                <tr>
+                    <td class="text-sm">${index + 1}</td>
+                    <td><div class="d-flex"><a href="#" class="my-auto fw-bold" onclick='viewLocation(${JSON.stringify(item.id)})'>${item.locationAddress}</a></div></td>
+                    <td class="text-sm">${item.name}</td>
+                    <td class="text-sm">${item.email}</td>
+                    <td class="text-sm">${statusBadge}</td>
+                    <td class="text-sm">${actionContent}</td>
+                </tr>`;
 
         tableBody.innerHTML += row;
     });
