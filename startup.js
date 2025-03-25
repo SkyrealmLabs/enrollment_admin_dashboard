@@ -26,33 +26,40 @@ const httpWebApp = express();
 httpWebApp.use(bodyParser.json()); // To parse JSON bodies
 
 // Create MySQL connection
-function handleDisconnect() {
-  db = mysql.createConnection({
-    host: 'localhost', 
-    user: 'root',         // Your MySQL username
-    password: '123456',     // Your MySQL password
-    database: 'skyintel',     // Your database name
+function createDatabasePool() {
+  db = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: '123456',
+    database: 'skyintel',
     port: 3307,
+    waitForConnections: true,
+    connectionLimit: 10, // Adjust as needed
+    queueLimit: 0
   });
 
-  db.connect(err => {
+  db.getConnection((err, connection) => {
     if (err) {
-      console.error('Error when connecting to the database:', err);
-      setTimeout(handleDisconnect, 2000); // Retry after 2 seconds
+      console.error('Error connecting to MySQL:', err);
+      setTimeout(createDatabasePool, 2000); // Retry if connection fails
     } else {
       console.log('Connected to MySQL Database');
+      connection.release(); // Release the initial connection
     }
   });
 
   db.on('error', err => {
     console.error('Database error:', err);
     if (err.code === 'PROTOCOL_CONNECTION_LOST') {
-      handleDisconnect(); // Reconnect if the connection is lost
+      console.log('Reconnecting to MySQL...');
+      createDatabasePool();
     } else {
       throw err;
     }
   });
 }
+
+createDatabasePool();
 
 // Express-PHP-FPM configuration
 const options = {
@@ -167,11 +174,11 @@ httpWebApp.post('/api/register', async (req, res) => {
 /**********************************************************************/
 // Updated login API to filter for user and admin
 httpWebApp.post('/api/login', async (req, res) => {
-  const { email, password, role } = req.body; // Include role in the request
+  const { email, password } = req.body; // Include role in the request
 
   // Input validation
-  if (!email || !password || !role) {
-    return res.status(400).json({ message: "Email, password, and role are required" });
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
   }
 
   try {
@@ -194,14 +201,12 @@ httpWebApp.post('/api/login', async (req, res) => {
     }
 
     // Check if the user's role matches the role they are trying to log in as
-    if (role === 'admin' && user.user_role_id !== 1) {
-      return res.status(403).json({ message: "Unauthorized: Admin access required" });
-    } else if (role === 'user' && user.user_role_id !== 3) {
-      return res.status(403).json({ message: "Unauthorized: User access required" });
-    }
+    // if (role === 'client' && user.user_role_id !== 3) {
+    //   return res.status(403).json({ message: "Unauthorized: User access required" });
+    // }
 
     // Generate a JWT token
-    const token = jwt.sign({ id: user.id, role: role }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, role: user.user_role_id }, JWT_SECRET, { expiresIn: '1h' });
 
     // Send the response with user data, message, and token
     res.status(200).json({
@@ -212,7 +217,7 @@ httpWebApp.post('/api/login', async (req, res) => {
         name: user.name, // Include other fields as necessary
         email: user.email,
         phoneno: user.phoneno,
-        role: role // Include the role for the response
+        role: user.user_role_id // Include the role for the response
       }
     });
   } catch (error) {
@@ -687,5 +692,3 @@ const PORT = process.env.PORT || 3005;
 httpWebApp.listen(PORT, '0.0.0.0', () => {
   console.log('SkyRealm Admin Panel is running in HTTP mode using port ' + PORT)
 });
-
-handleDisconnect();
