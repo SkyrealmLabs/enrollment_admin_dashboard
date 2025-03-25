@@ -416,7 +416,7 @@ httpWebApp.post('/api/location/getLocationDetailsById', (req, res) => {
 
   // Query to get non-deleted locations for the specified user
   const query = `
-    SELECT l.id, l.userid, l.aruco_id, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
+    SELECT l.id, l.userid, l.aruco_id, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath, l.mediaFileName
     FROM location l
     INNER JOIN location_status ls ON l.locationStatusId = ls.id
     INNER JOIN user u ON l.userid = u.id
