@@ -315,9 +315,12 @@ httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) =>
   // Get the current timestamp
   const timestamp = new Date();
 
+  // Get media file name
+  const mediaFileName = path.basename(req.file.path);
+
   // Add the new location to the database
-  db.query("INSERT INTO location (userid, locationStatusId, locationAddress, latitude, longitude, mediaPath, isDeleted, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [userID, 1, address, parsedCoordinate.latitude, parsedCoordinate.longitude, req.file.path, false, timestamp, timestamp], (err, result) => {
+  db.query("INSERT INTO location (userid, locationStatusId, locationAddress, latitude, longitude, mediaPath, mediaFileName, isDeleted, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [userID, 1, address, parsedCoordinate.latitude, parsedCoordinate.longitude, req.file.path, mediaFileName, false, timestamp, timestamp], (err, result) => {
       if (err) {
         return res.status(500).json({ message: "Database error" });
       }
@@ -636,6 +639,19 @@ httpWebApp.post('/api/location/validate', (req, res) => {
     }
   });
 });
+
+/**********************************************************************/
+/****************** SERVE INDEX.HTML FROM SUBDIRECTORIES **************/
+/**********************************************************************/
+httpWebApp.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.mov')) {
+      res.setHeader('Content-Type', 'video/quicktime'); // For .mov files
+    } else if (filePath.endsWith('.mp4')) {
+      res.setHeader('Content-Type', 'video/mp4'); // For .mp4 files
+    }
+  }
+}));
 
 /**********************************************************************/
 /*************************** HAVERSINE FUNCTION ***********************/
