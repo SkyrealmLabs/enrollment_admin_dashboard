@@ -343,7 +343,7 @@ httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) =>
 httpWebApp.get('/api/location/get', (req, res) => {
   // Query to get all non-deleted locations with status name
   const query = `
-    SELECT l.id, l.userid, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
+    SELECT l.id, l.userid, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath, l.mediaFileName
     FROM location l
     INNER JOIN location_status ls ON l.locationStatusId = ls.id
     INNER JOIN user u ON l.userid = u.id
@@ -377,7 +377,7 @@ httpWebApp.post('/api/location/getLocationByUserId', (req, res) => {
 
   // Query to get non-deleted locations for the specified user
   const query = `
-    SELECT l.id, l.userid, l.aruco_id, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath
+    SELECT l.id, l.userid, l.aruco_id, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath, l.mediaFileName
     FROM location l
     INNER JOIN location_status ls ON l.locationStatusId = ls.id
     WHERE l.isDeleted = false AND l.userid = ?
