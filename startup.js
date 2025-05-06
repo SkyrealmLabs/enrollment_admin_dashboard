@@ -319,8 +319,8 @@ httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) =>
   const mediaFileName = path.basename(req.file.path);
 
   // Add the new location to the database
-  db.query("INSERT INTO location (userid, locationStatusId, locationAddress, latitude, longitude, mediaPath, mediaFileName, isDeleted, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-    [userID, 1, address, parsedCoordinate.latitude, parsedCoordinate.longitude, req.file.path, mediaFileName, false, timestamp, timestamp], (err, result) => {
+  db.query("INSERT INTO location (userid, locationStatusId, locationAddress, aruco_id, latitude, longitude, mediaPath, mediaFileName, isDeleted, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+    [userID, 1, address, null, parsedCoordinate.latitude, parsedCoordinate.longitude, req.file.path, mediaFileName, false, timestamp, timestamp], (err, result) => {
       if (err) {
         return res.status(500).json({ message: "Database error" });
       }
@@ -343,7 +343,7 @@ httpWebApp.post('/api/location/add', upload.single('media'), (req, res, next) =>
 httpWebApp.get('/api/location/get', (req, res) => {
   // Query to get all non-deleted locations with status name
   const query = `
-    SELECT l.id, l.userid, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath, l.mediaFileName
+    SELECT l.id, l.userid, l.aruco_id, u.name, u.email, ls.name AS status, l.locationAddress, l.latitude, l.longitude, l.mediaPath, l.mediaFileName
     FROM location l
     INNER JOIN location_status ls ON l.locationStatusId = ls.id
     INNER JOIN user u ON l.userid = u.id
@@ -610,12 +610,14 @@ httpWebApp.post('/api/location/validate', (req, res) => {
     // Find nearest locations for pickup and dropoff
     const nearestPickup = findNearestLocation(
       pickup.latitude,
-      pickup.longitude
+      pickup.longitude,
+      pickup.aruco_id
     );
 
     const nearestDropoff = findNearestLocation(
       dropoff.latitude,
-      dropoff.longitude
+      dropoff.longitude,
+      dropoff.aruco_id
     );
 
     if (nearestPickup && nearestDropoff) {
@@ -703,7 +705,7 @@ httpWebApp.use(cors(corsOptions));
 // Serve PHP files from the www directory
 httpWebApp.use("/", epf(options));
 
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 5004;
 // Start the server
 httpWebApp.listen(PORT, '0.0.0.0', () => {
   console.log('SkyRealm Admin Panel is running in HTTP mode using port ' + PORT)
